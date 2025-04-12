@@ -59,13 +59,14 @@ def time2unknow(arr, m): # 미지의 공간, 시간의 벽, 시간의 벽 크기
 
 def time_bfs(arr, sd, si, sj, ed, ei, ej):
     length = len(arr)
+    q = deque()
     v = [[[0] * len(arr) for _ in range(len(arr))] for _ in range(5)] # 동서남북위 -> 각각 m X m 배열의 방문 그래프
 
-    q = deque([sd, si, sj])
+    q.append((sd, si, sj))
     v[sd][si][sj] = 1
 
-    while q: 
-        qd, qi, qj = deque.popleft()
+    while q:
+        qd, qi, qj = q.popleft()
 
         # 출구 찾음
         if (qd, qi, qj) == (ed, ei, ej):
@@ -78,22 +79,22 @@ def time_bfs(arr, sd, si, sj, ed, ei, ej):
             # 방향 설정: 네 방향으로 이동 가능
             if nj < 0: # 왼쪽 면으로 이동
                 turn_left = [1, 3, 0, 2, 1]
-                if qd == 5: nd = 1
+                if qd == 4: nd = 1
                 else: nd = turn_left[turn_left.index(qd)+1]
 
             # 오른쪽 면으로 이동
             if nj >= length:
                 turn_right = [0, 3, 1, 2, 0]
-                if qd == 5: nd = 0
+                if qd == 4: nd = 0
                 else: nd = turn_right[turn_right.index(qd)+1]
 
             # 위쪽 면으로 이동
             if ni < 0:
-                if qd == 5: nd = 4
-                else: nd = 5
+                if qd == 4: nd = 3
+                else: nd = 4
 
             # 아래쪽 면으로 이동
-            if pd == 5 and ni >= length: nd = 3
+            if qd == 5 and ni >= length: nd = 3
 
             #  미방문, 갈 수 있는 길
             if v[nd][ni][nj] == 0 and arr[nd][ni][nj] == 0:
@@ -106,9 +107,10 @@ def time_bfs(arr, sd, si, sj, ed, ei, ej):
 
 def unknown_bfs(v, dist, arr, si, sj, ei, ej):
     length = len(arr)
+    q = deque()
     # v = [[0]*len(arr) for _ in range(len(arr))] # 시간 이상 현상 미리 처리한 방문 그래프
     
-    q = dqeue([si, sj])
+    q.append((si, sj))
     v[si][sj] = 1
         
     while q: #
@@ -146,15 +148,43 @@ dist = time_bfs(timewall, t_sd, t_si, t_sj, t_ed, t_ei, t_ej)
 
 if dist != -1:
     # 시간 이상 처리, 방문 그래프 활용하여 미리 벽을 만들어 놓기
-    v = [[0] *   n for _ in range(n)]
+    v = [[0]*n for _ in range(n)]
     
     # 장애물과 탈출구가 있으면 시간 이상 현상 사라짐
+    for ai, aj, ad, av in anomaly:
+        v[ai][aj] = 1 # 시작 위치는 1
+        # 한 방향으로 이동
+        if ad == 0: # 동 -> 오른쪽
+            move = [0, 1] * av # 상수의 배수만큼 씩 움직임
+            ni, nj = ai+move[0], aj+move[1]
+            if 0<=ni<m and 0<=nj<m and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
+                v[ni][nj] = v[ai][aj] * av
+            else: break
 
-    for a in anomaly:
-        v[a[0]][a[1]] = [a[2], a[-1]] # 확산 방향, 확산 상수
-    
+        elif ad == 1: # 서 -> 왼쪽
+            move = [0, -1] * av
+            ni, nj = ai+move[0], aj+move[1]
+            if 0<=ni<m and 0<=nj<m and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
+                v[ni][nj] = v[ai][aj] * av
+            else: break
+
+        elif ad == 2: # 남 -> 아래
+            move = [1, 0] * av
+            ni, nj = ai+move[0], aj+move[1]
+            if 0<=ni<m and 0<=nj<m and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
+                v[ni][nj] = v[ai][aj] * av
+            else: break
+
+        elif ad == 3: # 북 -> 위
+            move = [-1, 0] * av 
+            ni, nj = ai+move[0], aj+move[1]
+            if 0<=ni<m and 0<=nj<m and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
+                v[ni][nj] = v[ai][aj] * av
+            else: break
+            
+
 
     # 미지의 공간에서 탐색 진행
     dist = unknown_bfs(v, dist, unknown, u_si, u_sj, u_ei, u_ej)
 
-print(rdist)
+print(dist)
