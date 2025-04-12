@@ -67,6 +67,7 @@ def time_bfs(arr, sd, si, sj, ed, ei, ej):
 
     while q:
         qd, qi, qj = q.popleft()
+        print(qd, qi, qj)
 
         # 출구 찾음
         if (qd, qi, qj) == (ed, ei, ej):
@@ -74,28 +75,36 @@ def time_bfs(arr, sd, si, sj, ed, ei, ej):
 
         # 상하좌우로 한 칸 이동: 다른 면으로 이동(범위 벗어남), 막힌 길
         for di, dj in ((-1,0), (1,0), (0,-1), (0,1)):
-            ni, nj = qi+di, qj+dj
+            nd, ni, nj = qd, qi+di, qj+dj
+
+            # 윗면만 아래로 이동 가능, 행은 항상 0
+            if qd == 4 and ni >= length: 
+                nd, ni = 2, 0
 
             # 방향 설정: 네 방향으로 이동 가능
-            if nj < 0: # 왼쪽 면으로 이동
+            if nj < 0 and qd != 4: # 왼쪽 면으로 이동, 행은 유지, 열은 마지막 인덱스
                 turn_left = {0:2, 1:3, 2:1, 3:0}
-                if qd == 4: nd = 1
-                else: nd = turn_left[qd]
+                nd, nj = turn_left[qd], m-1
 
-            # 오른쪽 면으로 이동
-            if nj >= length:
+            # 오른쪽 면으로 이동, 행 유지, 열 첫 인덱스
+            if nj >= length and qd != 4:
                 turn_right = {0:3, 1:2, 2:0, 3:1}
-                if qd == 4: nd = 0
-                else: nd = turn_right[qd]
+                nd, nj = turn_right[qd], 0
 
-            # 위쪽 면으로 이동
-            if ni < 0:
-                if qd == 4: nd = 3
-                else: nd = 4
+            # 동서남북면 -> 윗면
+            if ni < 0 and qd != 4:
+                nd = 4
+                if qd == 2: # 남, 마지막 행으로 변화, 열 유지
+                    ni = m-1
+                elif qd == 0: # 동, 행과 열 모두 변화
+                    ni = (m-1)-qj
+                    nj = (m-1)-qi
+                elif qd == 1: # 서, 행과 열 서로 바뀜
+                    ni, nj = nj, ni
+                elif qd == 3: # 북, 행 유지, 열 변화
+                    nj = (m-1)-qj
 
-            # 아래쪽 면으로 이동
-            if qd == 4 and ni >= length: nd = 3
-
+            print(nd, ni, nj)
             #  미방문, 갈 수 있는 길
             if v[nd][ni][nj] == 0 and arr[nd][ni][nj] == 0:
                 q.append([nd, ni, nj])
@@ -103,7 +112,6 @@ def time_bfs(arr, sd, si, sj, ed, ei, ej):
                 
     return -1
         
-
 
 def unknown_bfs(v, dist, arr, si, sj, ei, ej):
     length = len(arr)
@@ -125,7 +133,7 @@ def unknown_bfs(v, dist, arr, si, sj, ei, ej):
             ni, nj = qi+di, qj+dj
 
             # 범위 안, 이동 가능한 길
-            if 0<=ni<length and 0<=nj<length and arr[ni][nj] == 0:
+            if 0<=ni<length and 0<=nj<length and v[ni][nj] == 0 and arr[ni][nj] == 0:
                 q.append([ni, nj])
                 v[ni][nj] = v[qi][qj] + 1
     return -1
@@ -145,7 +153,7 @@ u_ei, u_ej = unknown_end(unknown)
 
 # 시간의 벽에서 팀색 진행
 dist = time_bfs(timewall, t_sd, t_si, t_sj, t_ed, t_ei, t_ej)
-
+print(dist)
 
 if dist != -1:
     # 시간 이상 처리, 방문 그래프 활용하여 미리 벽을 만들어 놓기
