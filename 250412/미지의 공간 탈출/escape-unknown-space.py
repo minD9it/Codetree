@@ -182,7 +182,7 @@ def unknown_bfs(v, dist, arr, si, sj, ei, ej):
 
             
 
-n, M, f = map(int, input().split()) # 미지의 공간, 시간의 벽, 시간 이상 현상 개수
+N, M, f = map(int, input().split()) # 미지의 공간, 시간의 벽, 시간 이상 현상 개수
 unknown = [list(map(int, input().split())) for _ in range(n)] # 미지의 공간 생성
 timewall = [[list(map(int, input().split())) for _ in range(M)] for _ in range(5)] # 동서남북윗면 순서로 입력 -> 시간의 벽 생성
 anomaly = [list(map(int, input().split())) for _ in range(f)] # 시간 이상 현상 생성
@@ -197,43 +197,60 @@ u_ei, u_ej = unknown_end(unknown)
 # dist = time_bfs(timewall, t_sd, t_si, t_sj, t_ed, t_ei, t_ej)
 dist = time_bfs(t_sd, t_si, t_sj, t_ed, t_ei, t_ej)
 
-if dist != -1:
-    # 시간 이상 처리, 방문 그래프 활용하여 미리 벽을 만들어 놓기
-    v = [[401]*n for _ in range(n)]
-    
-    # 장애물과 탈출구가 있으면 시간 이상 현상 사라짐
-    for ai, aj, ad, av in anomaly:
-        v[ai][aj] = 1 # 시작 위치는 1
-        # 한 방향으로 이동
-        if ad == 0: # 동 -> 오른쪽
-            move = [0, 1] * av # 상수의 배수만큼 씩 움직임
-            ni, nj = ai+move[0], aj+move[1]
-            if 0<=ni<M and 0<=nj<M and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
-                if v[ni][nj] > v[ai][aj] * av: v[ni][nj] = v[ai][aj] * av
-            else: break
-
-        elif ad == 1: # 서 -> 왼쪽
-            move = [0, -1] * av
-            ni, nj = ai+move[0], aj+move[1]
-            if 0<=ni<M and 0<=nj<M and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
-                if v[ni][nj] > v[ai][aj] * av: v[ni][nj] = v[ai][aj] * av
-            else: break
-
-        elif ad == 2: # 남 -> 아래
-            move = [1, 0] * av
-            ni, nj = ai+move[0], aj+move[1]
-            if 0<=ni<M and 0<=nj<M and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
-                if v[ni][nj] > v[ai][aj] * av: v[ni][nj] = v[ai][aj] * av
-            else: break
-
-        elif ad == 3: # 북 -> 위
-            move = [-1, 0] * av 
-            ni, nj = ai+move[0], aj+move[1]
-            if 0<=ni<M and 0<=nj<M and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
-                if v[ni][nj] > v[ai][aj] * av: v[ni][nj] = v[ai][aj] * av
-            else: break
-
-    # 미지의 공간에서 탐색 진행
+# 동 서 남 북
+di=[ 0, 0, 1,-1]
+dj=[ 1,-1, 0, 0]
+if dist!=-1:
+    # [3] 2차원 탐색 준비: 시간이상현상 처리해서 v에 시간표시: BFS확산시 그보다 작으면 통과하게표시
+    v = [[401]*N for _ in range(N)]
+    for wi,wj,wd,wv in wall:        # wv 단위로 wd방향으로 확산표시(출구가 아닌경우만 확산)
+        v[wi][wj]=1
+        for mul in range(1, N+1):
+            wi,wj = wi+di[wd], wj+dj[wd]
+            if 0<=wi<N and 0<=wj<N and arr[wi][wj]==0 and (wi,wj)!=(ei,ej):
+                if v[wi][wj]>wv*mul:    # 더 큰 값 일때만 갱신(겹칠수있으니)
+                    v[wi][wj]=wv*mul
+            else:
+                break
     dist = unknown_bfs(v, dist, unknown, u_si, u_sj, u_ei, u_ej)
+
+# if dist != -1:
+#     # 시간 이상 처리, 방문 그래프 활용하여 미리 벽을 만들어 놓기
+#     v = [[401]*n for _ in range(n)]
+    
+#     # 장애물과 탈출구가 있으면 시간 이상 현상 사라짐
+#     for ai, aj, ad, av in anomaly:
+#         v[ai][aj] = 1 # 시작 위치는 1
+#         # 한 방향으로 이동
+#         if ad == 0: # 동 -> 오른쪽
+#             move = [0, 1] * av # 상수의 배수만큼 씩 움직임
+#             ni, nj = ai+move[0], aj+move[1]
+#             if 0<=ni<M and 0<=nj<M and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
+#                 if v[ni][nj] > v[ai][aj] * av: v[ni][nj] = v[ai][aj] * av
+#             else: break
+
+#         elif ad == 1: # 서 -> 왼쪽
+#             move = [0, -1] * av
+#             ni, nj = ai+move[0], aj+move[1]
+#             if 0<=ni<M and 0<=nj<M and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
+#                 if v[ni][nj] > v[ai][aj] * av: v[ni][nj] = v[ai][aj] * av
+#             else: break
+
+#         elif ad == 2: # 남 -> 아래
+#             move = [1, 0] * av
+#             ni, nj = ai+move[0], aj+move[1]
+#             if 0<=ni<M and 0<=nj<M and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
+#                 if v[ni][nj] > v[ai][aj] * av: v[ni][nj] = v[ai][aj] * av
+#             else: break
+
+#         elif ad == 3: # 북 -> 위
+#             move = [-1, 0] * av 
+#             ni, nj = ai+move[0], aj+move[1]
+#             if 0<=ni<M and 0<=nj<M and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
+#                 if v[ni][nj] > v[ai][aj] * av: v[ni][nj] = v[ai][aj] * av
+#             else: break
+
+#     # 미지의 공간에서 탐색 진행
+#     dist = unknown_bfs(v, dist, unknown, u_si, u_sj, u_ei, u_ej)
 
 print(dist)
