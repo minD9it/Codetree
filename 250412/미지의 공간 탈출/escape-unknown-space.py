@@ -78,15 +78,15 @@ def time_bfs(arr, sd, si, sj, ed, ei, ej):
 
             # 방향 설정: 네 방향으로 이동 가능
             if nj < 0: # 왼쪽 면으로 이동
-                turn_left = [1, 3, 0, 2, 1]
+                turn_left = {0:2, 1:3, 2:1, 3:0}
                 if qd == 4: nd = 1
-                else: nd = turn_left[turn_left.index(qd)+1]
+                else: nd = turn_left[qd]
 
             # 오른쪽 면으로 이동
             if nj >= length:
-                turn_right = [0, 3, 1, 2, 0]
+                turn_right = {0:3, 1:2, 2:0, 3:1}
                 if qd == 4: nd = 0
-                else: nd = turn_right[turn_right.index(qd)+1]
+                else: nd = turn_right[qd]
 
             # 위쪽 면으로 이동
             if ni < 0:
@@ -94,7 +94,7 @@ def time_bfs(arr, sd, si, sj, ed, ei, ej):
                 else: nd = 4
 
             # 아래쪽 면으로 이동
-            if qd == 5 and ni >= length: nd = 3
+            if qd == 4 and ni >= length: nd = 3
 
             #  미방문, 갈 수 있는 길
             if v[nd][ni][nj] == 0 and arr[nd][ni][nj] == 0:
@@ -146,9 +146,10 @@ u_ei, u_ej = unknown_end(unknown)
 # 시간의 벽에서 팀색 진행
 dist = time_bfs(timewall, t_sd, t_si, t_sj, t_ed, t_ei, t_ej)
 
+
 if dist != -1:
     # 시간 이상 처리, 방문 그래프 활용하여 미리 벽을 만들어 놓기
-    v = [[0]*n for _ in range(n)]
+    v = [[401]*n for _ in range(n)]
     
     # 장애물과 탈출구가 있으면 시간 이상 현상 사라짐
     for ai, aj, ad, av in anomaly:
@@ -181,8 +182,6 @@ if dist != -1:
             if 0<=ni<m and 0<=nj<m and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
                 v[ni][nj] = v[ai][aj] * av
             else: break
-            
-
 
     # 미지의 공간에서 탐색 진행
     dist = unknown_bfs(v, dist, unknown, u_si, u_sj, u_ei, u_ej)
