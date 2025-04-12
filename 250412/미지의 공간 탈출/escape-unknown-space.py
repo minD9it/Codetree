@@ -67,15 +67,39 @@ def time_bfs(arr, sd, si, sj, ed, ei, ej):
     while q: 
         qd, qi, qj = deque.popleft()
 
-        # 상하좌우로 한 칸 이동: 다른 면으로 이동, 범위 벗어남, 막힌 길
+        # 출구 찾음
+        if (qd, qi, qj) == (ed, ei, ej):
+            return v[qd][qi][qj] # 최단 거리 결과값
+
+        # 상하좌우로 한 칸 이동: 다른 면으로 이동(범위 벗어남), 막힌 길
         for di, dj in ((-1,0), (1,0), (0,-1), (0,1)):
             ni, nj = qi+di, qj+dj
 
-            if 0<=ni<length and 0<=nj<length and arr[ni][nj] == 0:
-                q.append([ni, nj])
-                v[ni][nj] = 1
-                
+            # 방향 설정: 네 방향으로 이동 가능
+            if nj < 0: # 왼쪽 면으로 이동
+                turn_left = [1, 3, 0, 2, 1]
+                if qd == 5: nd = 1
+                else: nd = turn_left[turn_left.index(qd)+1]
 
+            # 오른쪽 면으로 이동
+            if nj >= length:
+                turn_right = [0, 3, 1, 2, 0]
+                if qd == 5: nd = 0
+                else: nd = turn_right[turn_right.index(qd)+1]
+
+            # 위쪽 면으로 이동
+            if ni < 0:
+                if qd == 5: nd = 4
+                else: nd = 5
+
+            # 아래쪽 면으로 이동
+            if pd == 5 and ni >= length: nd = 3
+
+            #  미방문, 갈 수 있는 길
+            if v[nd][ni][nj] == 0 and arr[nd][ni][nj] == 0:
+                q.append([nd, ni, nj])
+                v[nd][ni][nj] = v[qd][qi][qj] + 1 # 최단 거리 계산을 위해서 계속 +1을 하면서 진행
+                
     return -1
         
 
@@ -90,6 +114,10 @@ def unknown_bfs(dist, arr, si, sj, ei, ej):
     while q: #
         qi, qj = q.popleft()
 
+        # 탈출구 찾음
+        if (qi, qj) == (ei, ej):
+            return dist + v[qi][qj]
+
         # 상하좌우로 한 칸 이동: 범위 벗어남, 시간 이상 현상, 막힌 길(1)
         for di, dj in ((-1,0), (1,0), (0,-1), (0,1)):
             ni, nj = qi+di, qj+dj
@@ -97,8 +125,7 @@ def unknown_bfs(dist, arr, si, sj, ei, ej):
             # 범위 안, 이동 가능한 길
             if 0<=ni<length and 0<=nj<length and arr[ni][nj] == 0:
                 q.append([ni, nj])
-                v[ni][nj] = 1
-                dist += 1
+                v[ni][nj] = v[qi][qj] + 1
     return -1
 
             
@@ -115,9 +142,10 @@ t_ed, t_ei, t_ej, u_si, u_sj = time2unknow(unknown, m)
 u_ei, u_ej = unknown_end(unknown)
 
 # 시간의 벽에서 팀색 진행
-tdist = time_bfs(timewall, t_sd, t_si, t_sj, t_ed, t_ei, t_ej)
+dist = time_bfs(timewall, t_sd, t_si, t_sj, t_ed, t_ei, t_ej)
 
-# 미지의 공간에서 탐색 진행
-rdist = unknown_bfs(tdist, unknown, u_si, u_sj, u_ei, u_ej)
+if dist != -1:
+    # 미지의 공간에서 탐색 진행
+    dist = unknown_bfs(dist, unknown, u_si, u_sj, u_ei, u_ej)
 
 print(rdist)
