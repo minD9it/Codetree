@@ -104,9 +104,9 @@ def time_bfs(arr, sd, si, sj, ed, ei, ej):
         
 
 
-def unknown_bfs(dist, arr, si, sj, ei, ej):
+def unknown_bfs(v, dist, arr, si, sj, ei, ej):
     length = len(arr)
-    v = [[0]*len(arr) for _ in range(len(arr))] # 미지의 공간 만큼의 방문 그래프
+    # v = [[0]*len(arr) for _ in range(len(arr))] # 시간 이상 현상 미리 처리한 방문 그래프
     
     q = dqeue([si, sj])
     v[si][sj] = 1
@@ -132,7 +132,7 @@ def unknown_bfs(dist, arr, si, sj, ei, ej):
 
 n, m, f = map(int, input().split()) # 미지의 공간, 시간의 벽, 시간 이상 현상 개수
 unknown = [list(map(int, input().split())) for _ in range(n)] # 미지의 공간 생성
-timewall = [[list(map(int, input().split())) for _ in range(m)] for _ in range(5)] # 동서남북 순서로 입력 -> 시간의 벽 생성
+timewall = [[list(map(int, input().split())) for _ in range(m)] for _ in range(5)] # 동서남북윗면 순서로 입력 -> 시간의 벽 생성
 anomaly = [list(map(int, input().split())) for _ in range(f)] # 시간 이상 현상 생성
 
 
@@ -145,7 +145,16 @@ u_ei, u_ej = unknown_end(unknown)
 dist = time_bfs(timewall, t_sd, t_si, t_sj, t_ed, t_ei, t_ej)
 
 if dist != -1:
+    # 시간 이상 처리, 방문 그래프 활용하여 미리 벽을 만들어 놓기
+    v = [[0] *   n for _ in range(n)]
+    
+    # 장애물과 탈출구가 있으면 시간 이상 현상 사라짐
+
+    for a in anomaly:
+        v[a[0]][a[1]] = [a[2], a[-1]] # 확산 방향, 확산 상수
+    
+
     # 미지의 공간에서 탐색 진행
-    dist = unknown_bfs(dist, unknown, u_si, u_sj, u_ei, u_ej)
+    dist = unknown_bfs(v, dist, unknown, u_si, u_sj, u_ei, u_ej)
 
 print(rdist)
