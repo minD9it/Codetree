@@ -57,66 +57,112 @@ def time2unknow(arr, m): # 미지의 공간, 시간의 벽, 시간의 벽 크기
     return d, ti, tj, ui, uj
 
 
-def time_bfs(arr, sd, si, sj, ed, ei, ej):
-    length = len(arr)
-    q = deque()
-    v = [[[0] * length for _ in range(length)] for _ in range(5)] # 동서남북위 -> 각각 m X m 배열의 방문 그래프
+# def time_bfs(arr, sd, si, sj, ed, ei, ej):
+#     length = len(arr)
+#     q = deque()
+#     v = [[[0] * length for _ in range(length)] for _ in range(5)] # 동서남북위 -> 각각 m X m 배열의 방문 그래프
 
-    q.append((sd, si, sj))
-    v[sd][si][sj] = 1
+#     q.append((sd, si, sj))
+#     v[sd][si][sj] = 1
  
-    while q:
-        qd, qi, qj = q.popleft()
+#     while q:
+#         qd, qi, qj = q.popleft()
 
-        # 출구 찾음
-        if (qd, qi, qj) == (ed, ei, ej):
-            return v[qd][qi][qj] # 최단 거리 결과값
+#         # 출구 찾음
+#         if (qd, qi, qj) == (ed, ei, ej):
+#             return v[qd][qi][qj] # 최단 거리 결과값
 
-        # 상하좌우로 한 칸 이동: 다른 면으로 이동(범위 벗어남), 막힌 길
-        for di, dj in ((-1,0), (1,0), (0,-1), (0,1)):
-            nd, ni, nj = qd, qi+di, qj+dj
+#         # 상하좌우로 한 칸 이동: 다른 면으로 이동(범위 벗어남), 막힌 길
+#         for di, dj in ((-1,0), (1,0), (0,-1), (0,1)):
+#             nd, ni, nj = qd, qi+di, qj+dj
 
-            # 방향 설정: 네 방향으로 이동 가능
-            # 동서남북면 -> 윗면
-            if ni < 0:
-                if qd == 4: nd, ni, nj = 3, 0, (m-1)-qj
-                elif qd == 0: nd, ni, nj = 4, (m-1)-qj, m-1
-                elif qd == 1: nd, ni, nj = 4, qj, 0
-                elif qd == 2: nd, ni, nj = 4, m-1, qj
-                elif qd == 3: nd, ni, nj = 4, 0, (m-1)-qj
+#             # 방향 설정: 네 방향으로 이동 가능
+#             # 동서남북면 -> 윗면
+#             if ni < 0:
+#                 if qd == 4: nd, ni, nj = 3, 0, (m-1)-qj
+#                 elif qd == 0: nd, ni, nj = 4, (m-1)-qj, m-1
+#                 elif qd == 1: nd, ni, nj = 4, qj, 0
+#                 elif qd == 2: nd, ni, nj = 4, m-1, qj
+#                 elif qd == 3: nd, ni, nj = 4, 0, (m-1)-qj
 
-            elif ni >= length and qd == 4: # 윗면만 아래로 이동 가능, 행은 항상 0
-                nd, ni, nj = 2, 0, qj
+#             elif ni >= length and qd == 4: # 윗면만 아래로 이동 가능, 행은 항상 0
+#                 nd, ni, nj = 2, 0, qj
 
-            elif nj < 0: # 왼쪽 면으로 이동, 행은 유지, 열은 마지막 인덱스
-                if qd == 4: nd, ni, nj = 1, 0, qi
-                else:
-                    turn_left = {0:2, 1:3, 2:1, 3:0}
-                    nd, ni, nj = turn_left[qd], qi, m-1
+#             elif nj < 0: # 왼쪽 면으로 이동, 행은 유지, 열은 마지막 인덱스
+#                 if qd == 4: nd, ni, nj = 1, 0, qi
+#                 else:
+#                     turn_left = {0:2, 1:3, 2:1, 3:0}
+#                     nd, ni, nj = turn_left[qd], qi, m-1
 
-            # 오른쪽 면으로 이동, 행 유지, 열 첫 인덱스
-            elif nj >= length:
-                if qd == 4: nd, ni, nj = 0, 0, (m-1)-qi
-                else:
-                    turn_right = {0:3, 1:2, 2:0, 3:1}
-                    nd, ni, nj = turn_right[qd], qi, 0
+#             # 오른쪽 면으로 이동, 행 유지, 열 첫 인덱스
+#             elif nj >= length:
+#                 if qd == 4: nd, ni, nj = 0, 0, (m-1)-qi
+#                 else:
+#                     turn_right = {0:3, 1:2, 2:0, 3:1}
+#                     nd, ni, nj = turn_right[qd], qi, 0
             
-            #  미방문, 갈 수 있는 길
-            if (v[nd][ni][nj]==0) and (arr[nd][ni][nj]==0):
-                q.append((nd, ni, nj))
-                v[nd][ni][nj] = v[qd][qi][qj] + 1 # 최단 거리 계산을 위해서 계속 +1을 하면서 진행
-                
-    return -1
-        
+#             #  미방문, 갈 수 있는 길
+#             if (v[nd][ni][nj]==0) and (arr[nd][ni][nj]==0):
+#                 q.append((nd, ni, nj))
+#                 v[nd][ni][nj] = v[qd][qi][qj] + 1 # 최단 거리 계산을 위해서 계속 +1을 하면서 진행
+
+#     return -1
+
+left_nxt = {0:2, 2:1, 1:3, 3:0}
+right_nxt = {0:3, 2:0, 1:2, 3:1}
+# dist = bfs_3d(sk_3d, si_3d, sj_3d,ek_3d, ei_3d, ej_3d)
+from collections import deque
+def time_bfs(sk, si, sj,ek, ei, ej):
+    q = deque()
+    v = [[[0]*M for _ in range(M)] for _ in range(5)]
+
+    q.append((sk,si,sj))
+    v[sk][si][sj]=1
+
+    while q:
+        ck,ci,cj = q.popleft()
+
+        if (ck,ci,cj)==(ek,ei,ej):
+            # myprint_3d(v)
+            return v[ck][ci][cj]
+
+        # 네방향, 범위내/범위밖->다른평명 이동처리, 미방문
+        for di,dj in ((-1,0),(1,0),(0,-1),(0,1)):
+            ni,nj = ci+di, cj+dj
+
+            # 범위밖
+            if ni<0:    # 위쪽 범위 이탈
+                if ck==0:   nk,ni,nj = 4,(M-1)-cj,M-1
+                elif ck==1: nk,ni,nj = 4,cj,0
+                elif ck==2: nk,ni,nj = 4,M-1,cj
+                elif ck==3: nk,ni,nj = 4,0,(M-1)-cj
+                elif ck==4: nk,ni,nj = 3,0,(M-1)-cj
+            elif ni>=M: # 아래쪽 범위이탈
+                if ck==4:   nk,ni,nj = 2,0,cj
+                else:       continue
+            elif nj<0:  # 왼쪽 범위이탈
+                if ck==4:   nk,ni,nj = 1,0,ci
+                else:
+                    nk,ni,nj = left_nxt[ck],ci,M-1
+            elif nj>=M: # 오른쪽 범위이탈
+                if ck==4:   nk,ni,nj = 0,0,(M-1)-ci
+                else:
+                    nk,ni,nj = right_nxt[ck],ci,0
+            else:       # 이탈아니면 같은 평면
+                nk=ck
+
+            # 미방문, 조건 맞으면
+            if v[nk][ni][nj]==0 and timewall[nk][ni][nj]==0:
+                q.append((nk,ni,nj))
+                v[nk][ni][nj]=v[ck][ci][cj]+1        
 
 def unknown_bfs(v, dist, arr, si, sj, ei, ej):
     q = deque()
-    # v = [[0]*len(arr) for _ in range(len(arr))] # 시간 이상 현상 미리 처리한 방문 그래프
     
     q.append((si, sj))
     v[si][sj] = 1
         
-    while q: #
+    while q:
         qi, qj = q.popleft()
 
         # 탈출구 찾음
@@ -135,19 +181,20 @@ def unknown_bfs(v, dist, arr, si, sj, ei, ej):
 
             
 
-n, m, f = map(int, input().split()) # 미지의 공간, 시간의 벽, 시간 이상 현상 개수
+n, M, f = map(int, input().split()) # 미지의 공간, 시간의 벽, 시간 이상 현상 개수
 unknown = [list(map(int, input().split())) for _ in range(n)] # 미지의 공간 생성
-timewall = [[list(map(int, input().split())) for _ in range(m)] for _ in range(5)] # 동서남북윗면 순서로 입력 -> 시간의 벽 생성
+timewall = [[list(map(int, input().split())) for _ in range(M)] for _ in range(5)] # 동서남북윗면 순서로 입력 -> 시간의 벽 생성
 anomaly = [list(map(int, input().split())) for _ in range(f)] # 시간 이상 현상 생성
 
 
 # 시작 위치, 종료 위치 찾기: 시간의 벽, 미지의 공간 각각의 위치
 t_sd, t_si, t_sj = time_start(timewall)
-t_ed, t_ei, t_ej, u_si, u_sj = time2unknow(unknown, m)
+t_ed, t_ei, t_ej, u_si, u_sj = time2unknow(unknown, M)
 u_ei, u_ej = unknown_end(unknown)
 
 # 시간의 벽에서 팀색 진행
-dist = time_bfs(timewall, t_sd, t_si, t_sj, t_ed, t_ei, t_ej)
+# dist = time_bfs(timewall, t_sd, t_si, t_sj, t_ed, t_ei, t_ej)
+dist = time_bfs(t_sd, t_si, t_sj, t_ed, t_ei, t_ej)
 print(dist)
 
 if dist != -1:
@@ -161,29 +208,29 @@ if dist != -1:
         if ad == 0: # 동 -> 오른쪽
             move = [0, 1] * av # 상수의 배수만큼 씩 움직임
             ni, nj = ai+move[0], aj+move[1]
-            if 0<=ni<m and 0<=nj<m and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
-                v[ni][nj] = v[ai][aj] * av
+            if 0<=ni<M and 0<=nj<M and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
+                if v[ni][nj] > v[ai][aj] * av: v[ni][nj] = v[ai][aj] * av
             else: break
 
         elif ad == 1: # 서 -> 왼쪽
             move = [0, -1] * av
             ni, nj = ai+move[0], aj+move[1]
-            if 0<=ni<m and 0<=nj<m and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
-                v[ni][nj] = v[ai][aj] * av
+            if 0<=ni<M and 0<=nj<M and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
+                if v[ni][nj] > v[ai][aj] * av: v[ni][nj] = v[ai][aj] * av
             else: break
 
         elif ad == 2: # 남 -> 아래
             move = [1, 0] * av
             ni, nj = ai+move[0], aj+move[1]
-            if 0<=ni<m and 0<=nj<m and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
-                v[ni][nj] = v[ai][aj] * av
+            if 0<=ni<M and 0<=nj<M and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
+                if v[ni][nj] > v[ai][aj] * av: v[ni][nj] = v[ai][aj] * av
             else: break
 
         elif ad == 3: # 북 -> 위
             move = [-1, 0] * av 
             ni, nj = ai+move[0], aj+move[1]
-            if 0<=ni<m and 0<=nj<m and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
-                v[ni][nj] = v[ai][aj] * av
+            if 0<=ni<M and 0<=nj<M and known[ni][nj] == 0 and (ni, nj) != (u_ei, u_ej):
+                if v[ni][nj] > v[ai][aj] * av: v[ni][nj] = v[ai][aj] * av
             else: break
 
     # 미지의 공간에서 탐색 진행
