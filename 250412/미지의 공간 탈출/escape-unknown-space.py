@@ -157,6 +157,7 @@ def time_bfs(sk, si, sj,ek, ei, ej):
                 v[nk][ni][nj]=v[ck][ci][cj]+1        
 
 def unknown_bfs(v, dist, arr, si, sj, ei, ej):
+    length = len(arr)
     q = deque()
     
     q.append((si, sj))
@@ -195,7 +196,6 @@ u_ei, u_ej = unknown_end(unknown)
 # 시간의 벽에서 팀색 진행
 # dist = time_bfs(timewall, t_sd, t_si, t_sj, t_ed, t_ei, t_ej)
 dist = time_bfs(t_sd, t_si, t_sj, t_ed, t_ei, t_ej)
-print(dist)
 
 if dist != -1:
     # 시간 이상 처리, 방문 그래프 활용하여 미리 벽을 만들어 놓기
